@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(powershell -NoProfile -File \"C:\\\\Users\\\\cr\\\\.claude\\\\test-statusline.ps1\")",
-      "mcp__plugin_context7_context7__query-docs",
-      "Bash(powershell -NoProfile -File \"C:\\\\Users\\\\cr\\\\.claude\\\\statusline.ps1\")"
-    ]
-  }
-}
