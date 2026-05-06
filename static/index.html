@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图片压缩工具</title>
+<style>
+:root {
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --green-light: #dcfce7;
+  --green-bg: #f0fdf4;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.05);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+  background: var(--gray-50);
+  color: var(--gray-800);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* Header */
+.header {
+  background: white;
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: var(--shadow);
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo {
+  width: 36px; height: 36px;
+  background: var(--green);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 20px; font-weight: 700;
+}
+.header h1 { font-size: 20px; font-weight: 700; color: var(--gray-900); }
+.header-sub { font-size: 13px; color: var(--gray-500); margin-left: 4px; }
+
+/* Main */
+.main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+/* Upload Card */
+.card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-200);
+  padding: 32px;
+  margin-bottom: 24px;
+}
+.card-title {
+  font-size: 16px; font-weight: 600; color: var(--gray-800);
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title .icon { font-size: 20px; }
+
+/* Upload Zone */
+.upload-zone {
+  border: 2px dashed var(--gray-300);
+  border-radius: var(--radius);
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: var(--gray-50);
+  position: relative;
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--green);
+  background: var(--green-bg);
+}
+.upload-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  display: block;
+}
+.upload-title {
+  font-size: 18px; font-weight: 600; color: var(--gray-700);
+  margin-bottom: 6px;
+}
+.upload-hint {
+  font-size: 14px; color: var(--gray-400);
+}
+.upload-hint strong { color: var(--green); cursor: pointer; }
+.upload-hint strong:hover { text-decoration: underline; }
+
+.file-list-preview {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; justify-content: center;
+}
+.file-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--green-light); color: var(--green-dark);
+  font-size: 13px; padding: 4px 12px; border-radius: 20px;
+  font-weight: 500;
+}
+.file-tag .remove { cursor: pointer; font-weight: 700; opacity: .6; }
+.file-tag .remove:hover { opacity: 1; }
+
+/* Quality Row */
+.quality-row {
+  display: flex; align-items: center; gap: 16px; margin-top: 20px;
+  flex-wrap: wrap;
+}
+.quality-label {
+  font-size: 14px; font-weight: 600; color: var(--gray-600);
+  white-space: nowrap;
+}
+.preset-group { display: flex; gap: 6px; }
+.preset-btn {
+  padding: 6px 16px;
+  border: 1px solid var(--gray-300); border-radius: 20px;
+  background: white; color: var(--gray-600);
+  font-size: 13px; cursor: pointer; transition: all .15s;
+  font-weight: 500;
+}
+.preset-btn:hover { border-color: var(--green); color: var(--green-dark); }
+.preset-btn.active {
+  background: var(--green); color: white; border-color: var(--green);
+}
+.custom-slider {
+  display: flex; align-items: center; gap: 10px; margin-left: auto;
+}
+.custom-slider input[type=range] {
+  width: 120px; accent-color: var(--green);
+}
+.custom-slider .val {
+  font-size: 14px; font-weight: 700; color: var(--green-dark);
+  min-width: 36px; text-align: center;
+}
+
+/* Compress Button */
+.compress-btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 14px;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 16px; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.compress-btn:hover { background: var(--green-dark); }
+.compress-btn:disabled {
+  background: var(--gray-300); cursor: not-allowed; color: var(--gray-500);
+}
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid transparent; border-top-color: currentColor;
+  border-radius: 50%; animation: spin .6s linear infinite;
+  display: none;
+}
+.compress-btn.loading .spinner { display: block; }
+.compress-btn.loading .btn-text { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Results */
+.results-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.results-header h2 { font-size: 18px; font-weight: 700; }
+.results-header .summary { font-size: 13px; color: var(--gray-500); }
+.batch-actions { display: flex; gap: 8px; }
+.batch-btn {
+  padding: 8px 20px;
+  border: 1px solid var(--gray-300); border-radius: var(--radius-sm);
+  background: white; color: var(--gray-700);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: all .15s;
+}
+.batch-btn:hover { border-color: var(--green); color: var(--green-dark); }
+.batch-btn.primary {
+  background: var(--green); color: white; border-color: var(--green);
+}
+.batch-btn.primary:hover { background: var(--green-dark); }
+
+.result-card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-200);
+  padding: 24px;
+  margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 24px;
+  align-items: center;
+  animation: fadeIn .3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.result-preview {
+  text-align: center;
+}
+.result-preview img {
+  max-width: 100%; max-height: 180px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  object-fit: contain;
+  background: #fafafa;
+}
+.result-preview .label {
+  font-size: 12px; color: var(--gray-400); margin-top: 8px;
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.result-preview .dim {
+  font-size: 12px; color: var(--gray-400); margin-top: 2px;
+}
+
+.result-divider {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.arrow-icon {
+  font-size: 24px; color: var(--gray-300);
+}
+.ratio-badge {
+  background: var(--green-light); color: var(--green-dark);
+  font-size: 14px; font-weight: 700; padding: 6px 14px;
+  border-radius: 20px; white-space: nowrap;
+}
+
+.result-info {
+  font-size: 14px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.result-info .name { font-weight: 600; color: var(--gray-800); font-size: 15px; word-break: break-all; }
+.result-info .stat { color: var(--gray-500); display: flex; align-items: center; gap: 6px; }
+.result-info .stat .stat-icon { font-size: 14px; }
+.result-info .stat strong { color: var(--gray-700); }
+
+.download-btn {
+  margin-top: 12px;
+  padding: 8px 20px;
+  background: var(--green);
+  color: white; border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+}
+.download-btn:hover { background: var(--green-dark); }
+
+.error-badge {
+  background: #fef2f2; color: #dc2626;
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  font-size: 14px; border: 1px solid #fecaca;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 32px;
+  color: var(--gray-400);
+  font-size: 13px;
+}
+
+/* States */
+.empty-state {
+  text-align: center;
+  padding: 64px 24px;
+  color: var(--gray-400);
+}
+.empty-state .icon { font-size: 56px; margin-bottom: 12px; }
+.empty-state p { font-size: 15px; }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .header { padding: 0 16px; height: 56px; }
+  .header h1 { font-size: 17px; }
+  .header-sub { display: none; }
+  .main { padding: 20px 12px 48px; }
+  .card { padding: 20px; }
+  .upload-zone { padding: 32px 16px; }
+  .upload-icon { font-size: 36px; }
+  .upload-title { font-size: 16px; }
+  .quality-row { flex-direction: column; align-items: flex-start; }
+  .custom-slider { margin-left: 0; width: 100%; }
+  .custom-slider input[type=range] { flex: 1; }
+
+  .result-card {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    text-align: center;
+  }
+  .result-divider { flex-direction: row; }
+  .result-info { align-items: center; }
+}
+
+@media (max-width: 480px) {
+  .preset-group { width: 100%; }
+  .preset-btn { flex: 1; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo">&#9889;</div>
+    <h1>图片压缩工具</h1>
+    <span class="header-sub">在线压缩 · 免费 · 安全</span>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- Upload Card -->
+  <div class="card" id="uploadCard">
+    <div class="card-title">
+      <span class="icon">&#128206;</span> 上传图片
+    </div>
+
+    <div class="upload-zone" id="uploadZone">
+      <span class="upload-icon">&#128247;</span>
+      <div class="upload-title">拖放图片到此处</div>
+      <div class="upload-hint">
+        或 <strong id="browseLink">点击浏览文件</strong> · 支持 JPG、PNG、WebP、GIF、BMP
+      </div>
+    </div>
+    <input type="file" id="fileInput" multiple hidden accept=".jpg,.jpeg,.png,.webp,.gif,.bmp">
+
+    <div class="file-list-preview" id="fileList"></div>
+
+    <div class="quality-row">
+      <span class="quality-label">压缩质量</span>
+      <div class="preset-group" id="presetGroup">
+        <button class="preset-btn" data-q="90">高</button>
+        <button class="preset-btn active" data-q="70">中</button>
+        <button class="preset-btn" data-q="40">低</button>
+      </div>
+      <div class="custom-slider">
+        <input type="range" min="10" max="100" value="70" id="qualitySlider">
+        <span class="val" id="qualityVal">70%</span>
+      </div>
+    </div>
+
+    <button class="compress-btn" id="compressBtn" disabled>
+      <span class="btn-text">开始压缩</span>
+      <span class="spinner"></span>
+    </button>
+  </div>
+
+  <!-- Results -->
+  <div id="resultsSection" style="display:none;">
+    <div class="results-header">
+      <div>
+        <h2>压缩结果</h2>
+        <span class="summary" id="resultsSummary"></span>
+      </div>
+      <div class="batch-actions">
+        <button class="batch-btn primary" id="downloadAllBtn">下载全部 (ZIP)</button>
+        <button class="batch-btn" id="clearBtn">清空</button>
+      </div>
+    </div>
+    <div id="resultsList"></div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" id="emptyState">
+    <div class="icon">&#128640;</div>
+    <p>上传图片开始压缩</p>
+  </div>
+
+</main>
+
+<footer class="footer">
+  所有处理均在本地完成，您的图片不会上传到任何服务器
+</footer>
+
+<script>
+const uploadZone = document.getElementById("uploadZone");
+const fileInput = document.getElementById("fileInput");
+const browseLink = document.getElementById("browseLink");
+const fileListEl = document.getElementById("fileList");
+const compressBtn = document.getElementById("compressBtn");
+const presetGroup = document.getElementById("presetGroup");
+const qualitySlider = document.getElementById("qualitySlider");
+const qualityVal = document.getElementById("qualityVal");
+const resultsSection = document.getElementById("resultsSection");
+const resultsList = document.getElementById("resultsList");
+const resultsSummary = document.getElementById("resultsSummary");
+const emptyState = document.getElementById("emptyState");
+const downloadAllBtn = document.getElementById("downloadAllBtn");
+const clearBtn = document.getElementById("clearBtn");
+
+let selectedFiles = [];
+let quality = 70;
+let batchDownloadId = null;
+
+// Quality selection
+presetGroup.addEventListener("click", (e) => {
+  const btn = e.target.closest(".preset-btn");
+  if (!btn) return;
+  presetGroup.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  quality = parseInt(btn.dataset.q);
+  qualitySlider.value = quality;
+  qualityVal.textContent = quality + "%";
+});
+
+qualitySlider.addEventListener("input", () => {
+  quality = parseInt(qualitySlider.value);
+  qualityVal.textContent = quality + "%";
+  presetGroup.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
+});
+
+// File selection
+browseLink.addEventListener("click", () => fileInput.click());
+uploadZone.addEventListener("click", () => fileInput.click());
+
+fileInput.addEventListener("change", () => {
+  addFiles(Array.from(fileInput.files));
+  fileInput.value = "";
+});
+
+// Drag & drop
+["dragenter", "dragover", "dragleave", "drop"].forEach(evt => {
+  uploadZone.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); });
+});
+
+uploadZone.addEventListener("dragenter", () => uploadZone.classList.add("drag-over"));
+uploadZone.addEventListener("dragover", () => uploadZone.classList.add("drag-over"));
+uploadZone.addEventListener("dragleave", (e) => {
+  if (!uploadZone.contains(e.relatedTarget)) uploadZone.classList.remove("drag-over");
+});
+uploadZone.addEventListener("drop", (e) => {
+  uploadZone.classList.remove("drag-over");
+  addFiles(Array.from(e.dataTransfer.files));
+});
+
+function addFiles(files) {
+  const validExts = ["jpg", "jpeg", "png", "webp", "gif", "bmp"];
+  const valid = files.filter(f => {
+    const ext = f.name.split(".").pop().toLowerCase();
+    return validExts.includes(ext);
+  });
+  if (valid.length === 0) return;
+  selectedFiles = [...selectedFiles, ...valid].slice(0, 20);
+  renderFileTags();
+  updateCompressBtn();
+}
+
+function renderFileTags() {
+  fileListEl.innerHTML = selectedFiles.map((f, i) =>
+    `<span class="file-tag">${escHtml(f.name)} <span class="remove" data-idx="${i}">&times;</span></span>`
+  ).join("");
+  fileListEl.querySelectorAll(".remove").forEach(el => {
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const idx = parseInt(el.dataset.idx);
+      selectedFiles.splice(idx, 1);
+      renderFileTags();
+      updateCompressBtn();
+    });
+  });
+}
+
+function updateCompressBtn() {
+  compressBtn.disabled = selectedFiles.length === 0;
+}
+
+// Compress
+compressBtn.addEventListener("click", async () => {
+  if (selectedFiles.length === 0) return;
+
+  compressBtn.classList.add("loading");
+  compressBtn.disabled = true;
+
+  resultsList.innerHTML = "";
+  resultsSection.style.display = "block";
+  emptyState.style.display = "none";
+  batchDownloadId = null;
+
+  const formData = new FormData();
+  selectedFiles.forEach(f => formData.append("files", f));
+  formData.append("quality", quality);
+
+  try {
+    const resp = await fetch("/api/compress-batch", { method: "POST", body: formData });
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      resultsList.innerHTML = `<div class="error-badge">${escHtml(data.error || "压缩失败")}</div>`;
+      return;
+    }
+
+    batchDownloadId = data.batch_id;
+    const total = formatBytes(data.total_original_size);
+    const saved = data.total_compression_ratio;
+    resultsSummary.textContent = `共 ${data.results.length} 个文件，总计 ${total}，节省 ${saved}%`;
+
+    data.results.forEach((r, i) => {
+      if (r.error) {
+        resultsList.innerHTML += `<div class="error-badge">${escHtml(r.original_name)}: ${escHtml(r.error)}</div>`;
+        return;
+      }
+
+      const origUrl = URL.createObjectURL(selectedFiles[i]);
+      const dlUrl = `/api/download/${r.download_id}`;
+
+      const card = document.createElement("div");
+      card.className = "result-card";
+      card.innerHTML = `
+        <div class="result-preview">
+          <img src="${origUrl}" alt="原图" loading="lazy">
+          <div class="label">原图</div>
+          <div class="dim">${r.original_width} × ${r.original_height} · ${formatBytes(r.original_size)}</div>
+        </div>
+        <div class="result-divider">
+          <span class="arrow-icon">→</span>
+          <span class="ratio-badge">-${r.compression_ratio}%</span>
+        </div>
+        <div class="result-preview">
+          <img src="${dlUrl}" alt="压缩后" loading="lazy">
+          <div class="label">压缩后 (${r.output_format})</div>
+          <div class="dim">${r.compressed_width} × ${r.compressed_height} · ${formatBytes(r.compressed_size)}</div>
+          <a href="${dlUrl}" class="download-btn" style="text-decoration:none;display:inline-block;">下载</a>
+        </div>
+      `;
+      resultsList.appendChild(card);
+    });
+  } catch (err) {
+    resultsList.innerHTML = `<div class="error-badge">网络错误: ${escHtml(err.message)}</div>`;
+  } finally {
+    compressBtn.classList.remove("loading");
+    compressBtn.disabled = false;
+  }
+});
+
+// Batch download
+downloadAllBtn.addEventListener("click", () => {
+  if (batchDownloadId) {
+    window.location.href = `/api/download-batch/${batchDownloadId}`;
+  }
+});
+
+// Clear
+clearBtn.addEventListener("click", () => {
+  selectedFiles = [];
+  resultsList.innerHTML = "";
+  resultsSection.style.display = "none";
+  emptyState.style.display = "";
+  batchDownloadId = null;
+  renderFileTags();
+  updateCompressBtn();
+});
+
+// Helpers
+function formatBytes(bytes) {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+}
+
+function escHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+
+</body>
+</html>
