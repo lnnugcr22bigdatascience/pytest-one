@@ -1,0 +1,55 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: ⚡
+      - heading "图片压缩工具" [level=1] [ref=e5]
+      - generic [ref=e6]: 在线压缩 · 免费 · 安全
+  - main [ref=e7]:
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e10]: 📎
+        - text: 上传图片
+      - generic [ref=e11] [cursor=pointer]:
+        - generic [ref=e12]: 📷
+        - generic [ref=e13]: 拖放图片到此处
+        - generic [ref=e14]:
+          - text: 或
+          - strong [ref=e15]: 点击浏览文件
+          - text: · 支持 JPG、PNG、WebP、GIF、BMP
+      - generic [ref=e32]:
+        - text: test.png
+        - generic [ref=e33] [cursor=pointer]: ×
+      - generic [ref=e16]:
+        - generic [ref=e17]: 压缩质量
+        - generic [ref=e18]:
+          - button "高" [ref=e19] [cursor=pointer]
+          - button "中" [ref=e20] [cursor=pointer]
+          - button "低" [ref=e21] [cursor=pointer]
+        - generic [ref=e22]:
+          - slider [ref=e23]: "70"
+          - generic [ref=e24]: 70%
+      - button "开始压缩" [ref=e25] [cursor=pointer]:
+        - generic [ref=e26]: 开始压缩
+    - generic [ref=e34]:
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - heading "压缩结果" [level=2] [ref=e37]
+          - text: 共 1 个文件，总计 122.7 KB，节省 68.3%
+        - generic [ref=e38]:
+          - button "下载全部 (ZIP)" [ref=e39] [cursor=pointer]
+          - button "清空" [ref=e40] [cursor=pointer]
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - img "原图" [ref=e44]
+          - generic [ref=e45]: 原图
+          - generic [ref=e46]: 400 × 300 · 122.7 KB
+        - generic [ref=e47]:
+          - generic [ref=e48]: →
+          - generic [ref=e49]: "-68.3%"
+        - generic [ref=e50]:
+          - img "压缩后" [ref=e51]
+          - generic [ref=e52]: 压缩后 (PNG)
+          - generic [ref=e53]: 400 × 300 · 38.9 KB
+          - link "下载" [ref=e54] [cursor=pointer]:
+            - /url: /api/download/5a402e45-40c
+  - contentinfo [ref=e30]: 所有处理均在本地完成，您的图片不会上传到任何服务器
